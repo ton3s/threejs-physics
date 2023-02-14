@@ -59,15 +59,6 @@ const defaultContactMaterial = new CANNON.ContactMaterial(
 world.defaultContactMaterial = defaultContactMaterial
 
 // Physics Objects
-// Sphere
-const sphereShape = new CANNON.Sphere(0.5)
-const sphereBody = new CANNON.Body({
-	mass: 1,
-	position: new CANNON.Vec3(0, 3, 0),
-})
-sphereBody.applyLocalForce(new CANNON.Vec3(250, 0, 0), new CANNON.Vec3(0, 0, 0))
-sphereBody.addShape(sphereShape)
-world.addBody(sphereBody)
 
 // Floor
 const floorShape = new CANNON.Plane()
@@ -79,26 +70,10 @@ floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), Math.PI * 0.5)
 world.addBody(floorBody)
 
 /**
- * Test sphere
- */
-const sphere = new THREE.Mesh(
-	new THREE.SphereGeometry(0.5, 32, 32),
-	new THREE.MeshStandardMaterial({
-		metalness: 0.3,
-		roughness: 0.4,
-		envMap: environmentMapTexture,
-		envMapIntensity: 0.5,
-	})
-)
-sphere.castShadow = true
-sphere.position.y = 0.5
-scene.add(sphere)
-
-/**
  * Floor
  */
 const floor = new THREE.Mesh(
-	new THREE.PlaneGeometry(10, 10),
+	new THREE.PlaneGeometry(50, 50),
 	new THREE.MeshStandardMaterial({
 		color: '#777777',
 		metalness: 0.3,
@@ -160,7 +135,7 @@ const camera = new THREE.PerspectiveCamera(
 	0.1,
 	100
 )
-camera.position.set(-3, 3, 3)
+camera.position.set(-3, 6, 6)
 scene.add(camera)
 
 // Controls
@@ -177,6 +152,45 @@ renderer.shadowMap.enabled = true
 renderer.shadowMap.type = THREE.PCFSoftShadowMap
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+// Utils
+const objectsToUpdate = []
+const createSphere = (radius, position) => {
+	const mesh = new THREE.Mesh(
+		new THREE.SphereGeometry(radius, 20, 20),
+		new THREE.MeshStandardMaterial({
+			metalness: 0.3,
+			roughness: 0.4,
+			envMap: environmentMapTexture,
+		})
+	)
+	mesh.castShadow = true
+	mesh.position.copy(position)
+	scene.add(mesh)
+
+	// Cannon.js Body
+	const shape = new CANNON.Sphere(radius)
+	const body = new CANNON.Body({
+		mass: 1,
+		position,
+		shape: shape,
+		material: defaultMaterial,
+	})
+	body.position.copy(position)
+	world.addBody(body)
+
+	// Save in objects to update
+	objectsToUpdate.push({ mesh, body })
+}
+
+// Spheres
+for (let i = 0; i < 250; i++) {
+	createSphere(0.5, {
+		x: (Math.random() - 0.5) * 10,
+		y: Math.random() * 10,
+		z: (Math.random() - 0.5) * 10,
+	})
+}
 
 /**
  * Animate
@@ -199,9 +213,10 @@ const tick = () => {
 	window.requestAnimationFrame(tick)
 
 	// Update physics world
-	sphereBody.applyLocalForce(new CANNON.Vec3(-0.5, 0, 0), sphereBody.position)
 	world.step(1 / 60, deltaTime, 3)
-	sphere.position.copy(sphereBody.position)
+	objectsToUpdate.forEach((object) =>
+		object.mesh.position.copy(object.body.position)
+	)
 }
 
 tick()
