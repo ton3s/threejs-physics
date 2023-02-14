@@ -7,6 +7,15 @@ import CANNON from 'cannon'
  * Debug
  */
 const gui = new dat.GUI()
+const debugObject = {}
+debugObject.createSphere = () => {
+	createSphere(Math.random() * 0.4 + 0.2, {
+		x: (Math.random() - 0.5) * 5,
+		y: Math.random() * 5 + 2,
+		z: (Math.random() - 0.5) * 5,
+	})
+}
+gui.add(debugObject, 'createSphere')
 
 /**
  * Base
@@ -20,8 +29,8 @@ const scene = new THREE.Scene()
 /**
  * Axes Helper
  */
-const axesHelper = new THREE.AxesHelper(5)
-scene.add(axesHelper)
+// const axesHelper = new THREE.AxesHelper(5)
+// scene.add(axesHelper)
 
 /**
  * Textures
@@ -73,7 +82,7 @@ world.addBody(floorBody)
  * Floor
  */
 const floor = new THREE.Mesh(
-	new THREE.PlaneGeometry(50, 50),
+	new THREE.PlaneGeometry(15, 15),
 	new THREE.MeshStandardMaterial({
 		color: '#777777',
 		metalness: 0.3,
@@ -135,7 +144,7 @@ const camera = new THREE.PerspectiveCamera(
 	0.1,
 	100
 )
-camera.position.set(-3, 6, 6)
+camera.position.set(-3, 4, 6)
 scene.add(camera)
 
 // Controls
@@ -155,16 +164,17 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 // Utils
 const objectsToUpdate = []
+
+const sphereGeometry = new THREE.SphereGeometry(1, 20, 20)
+const sphereMaterial = new THREE.MeshStandardMaterial({
+	metalness: 0.3,
+	roughness: 0.4,
+	envMap: environmentMapTexture,
+})
 const createSphere = (radius, position) => {
-	const mesh = new THREE.Mesh(
-		new THREE.SphereGeometry(radius, 20, 20),
-		new THREE.MeshStandardMaterial({
-			metalness: 0.3,
-			roughness: 0.4,
-			envMap: environmentMapTexture,
-		})
-	)
+	const mesh = new THREE.Mesh(sphereGeometry, sphereMaterial)
 	mesh.castShadow = true
+	mesh.scale.set(radius, radius, radius)
 	mesh.position.copy(position)
 	scene.add(mesh)
 
@@ -181,15 +191,6 @@ const createSphere = (radius, position) => {
 
 	// Save in objects to update
 	objectsToUpdate.push({ mesh, body })
-}
-
-// Spheres
-for (let i = 0; i < 250; i++) {
-	createSphere(0.5, {
-		x: (Math.random() - 0.5) * 10,
-		y: Math.random() * 10,
-		z: (Math.random() - 0.5) * 10,
-	})
 }
 
 /**
