@@ -18,6 +18,12 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 /**
+ * Axes Helper
+ */
+const axesHelper = new THREE.AxesHelper(5)
+scene.add(axesHelper)
+
+/**
  * Textures
  */
 const textureLoader = new THREE.TextureLoader()
@@ -47,7 +53,7 @@ const defaultContactMaterial = new CANNON.ContactMaterial(
 	defaultMaterial,
 	{
 		friction: 0.1,
-		restitution: 0.9,
+		restitution: 0.7,
 	}
 )
 world.defaultContactMaterial = defaultContactMaterial
@@ -59,6 +65,7 @@ const sphereBody = new CANNON.Body({
 	mass: 1,
 	position: new CANNON.Vec3(0, 3, 0),
 })
+sphereBody.applyLocalForce(new CANNON.Vec3(250, 0, 0), new CANNON.Vec3(0, 0, 0))
 sphereBody.addShape(sphereShape)
 world.addBody(sphereBody)
 
