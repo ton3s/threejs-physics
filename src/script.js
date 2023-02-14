@@ -122,7 +122,7 @@ world.addBody(floorBody)
  * Floor
  */
 const floor = new THREE.Mesh(
-	new THREE.PlaneGeometry(15, 15),
+	new THREE.PlaneGeometry(20, 20),
 	new THREE.MeshStandardMaterial({
 		color: '#777777',
 		metalness: 0.3,
@@ -259,18 +259,19 @@ const createBox = (width, height, depth, position) => {
 	objectsToUpdate.push({ mesh, body })
 }
 
-// for (let i = 0; i < 25; i++) {
-// 	createSphere(Math.random() * 0.4 + 0.2, {
-// 		x: (Math.random() - 0.5) * 5,
-// 		y: Math.random() * 5 + 2,
-// 		z: (Math.random() - 0.5) * 5,
-// 	})
-// 	createBox(Math.random() * 2, Math.random() * 2, Math.random() * 2, {
-// 		x: (Math.random() - 0.5) * 5,
-// 		y: Math.random() * 5 + 2,
-// 		z: (Math.random() - 0.5) * 5,
-// 	})
-// }
+// Randomly add 10 boxes and spheres
+for (let i = 0; i < 10; i++) {
+	createSphere(Math.random() * 0.4 + 0.2, {
+		x: (Math.random() - 0.5) * 5,
+		y: Math.random() * 5 + 2,
+		z: (Math.random() - 0.5) * 5,
+	})
+	createBox(Math.random() * 2, Math.random() * 2, Math.random() * 2, {
+		x: (Math.random() - 0.5) * 5,
+		y: Math.random() * 5 + 2,
+		z: (Math.random() - 0.5) * 5,
+	})
+}
 
 /**
  * Animate
