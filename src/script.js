@@ -26,6 +26,19 @@ debugObject.createBox = () => {
 }
 gui.add(debugObject, 'createBox')
 
+debugObject.reset = () => {
+	objectsToUpdate.forEach((object) => {
+		// Remove body
+		object.body.removeEventListener('collide', playHitSound)
+		world.removeBody(object.body)
+
+		// Remove mesh
+		scene.remove(object.mesh)
+	})
+	objectsToUpdate.splice(0, objectsToUpdate.length)
+}
+gui.add(debugObject, 'reset')
+
 /**
  * Base
  */
@@ -40,6 +53,21 @@ const scene = new THREE.Scene()
  */
 // const axesHelper = new THREE.AxesHelper(5)
 // scene.add(axesHelper)
+
+/**
+ * Sounds
+ */
+const hitSound = new Audio('/sounds/hit.mp3')
+const playHitSound = (collision) => {
+	const impactStrength = collision.contact.getImpactVelocityAlongNormal()
+	const normalizedImpactStrength =
+		impactStrength > 5 ? 1 : impactStrength * 0.05
+	if (impactStrength > 1.5) {
+		hitSound.volume = normalizedImpactStrength
+		hitSound.currentTime = 0
+		hitSound.play()
+	}
+}
 
 /**
  * Textures
@@ -62,6 +90,7 @@ const environmentMapTexture = cubeTextureLoader.load([
 // World
 const world = new CANNON.World()
 world.broadphase = new CANNON.SAPBroadphase(world)
+world.allowSleep = true
 world.gravity.set(0, -9.82, 0)
 
 // Materials
@@ -223,11 +252,25 @@ const createBox = (width, height, depth, position) => {
 		material: defaultMaterial,
 	})
 	body.position.copy(position)
+	body.addEventListener('collide', playHitSound)
 	world.addBody(body)
 
 	// Save in objects to update
 	objectsToUpdate.push({ mesh, body })
 }
+
+// for (let i = 0; i < 25; i++) {
+// 	createSphere(Math.random() * 0.4 + 0.2, {
+// 		x: (Math.random() - 0.5) * 5,
+// 		y: Math.random() * 5 + 2,
+// 		z: (Math.random() - 0.5) * 5,
+// 	})
+// 	createBox(Math.random() * 2, Math.random() * 2, Math.random() * 2, {
+// 		x: (Math.random() - 0.5) * 5,
+// 		y: Math.random() * 5 + 2,
+// 		z: (Math.random() - 0.5) * 5,
+// 	})
+// }
 
 /**
  * Animate
